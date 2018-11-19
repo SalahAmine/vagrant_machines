@@ -1,0 +1,48 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+# Vagrant multi-machine sample setup
+# ref: https://stackoverflow.com/questions/24867252/allow-two-or-more-vagrant-vms-to-communicate-on-their-own-network
+
+VAGRANTFILE_API_VERSION = "2"
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  # dont generate a pub/private key for this connection
+  # and use the unsecure private key shipped by vagrant by default
+  # which resides under .vagrant.d/insecure_private_key
+  # this way, the corresponding pub key will be inserted
+  # by vagrant into  ~/.ssh/authorized_keys
+  # https://github.com/hashicorp/vagrant/tree/master/keys
+  config.ssh.insert_key = false
+  # this is the default private_key used
+  config.ssh.private_key_path = [ "~/.vagrant.d/insecure_private_key"]
+
+  config.vm.define :hdpsandbox do |hdpsandbox|
+    # centos 7.5
+    hdpsandbox.vm.box = "bento/centos-7"
+    hdpsandbox.vm.box_version = "201808.24.0"
+    hdpsandbox.vm.network :private_network, ip: "10.0.0.21"
+    hdpsandbox.vm.network "forwarded_port", guest: 22, host: 2221
+    hdpsandbox.vm.network "forwarded_port", guest: 8080, host: 8081
+    # for oozie UI
+    hdpsandbox.vm.network "forwarded_port", guest: 11000, host: 11000
+    # for spark2 UI
+    hdpsandbox.vm.network "forwarded_port", guest: 18081, host: 18081
+
+    hdpsandbox.vm.hostname = "hdpsandbox"
+
+    hdpsandbox.vm.provision "shell", path: "provision_machine.sh"
+
+
+    hdpsandbox.vm.provider :virtualbox do |vb|
+      vb.name = "hdpsandbox"
+      vb.memory = 9216
+      vb.cpus = 4
+    end
+  end
+
+end
