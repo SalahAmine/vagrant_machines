@@ -1,0 +1,3 @@
+currently to connect to other VMs withh ssh
+you should generate a key pair a distribue you id ( pub key )
+to other remote machines ( this is done manually)
