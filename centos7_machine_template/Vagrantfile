@@ -26,7 +26,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     template.vm.box = "bento/centos-7"
     template.vm.box_version = "201808.24.0"
     template.vm.network :private_network, ip: "10.0.0.20"
-    template.vm.network "forwarded_port", guest: 22, host: 2220
+    # Must specified `id: "ssh"` in order to override the default forwarded SSH port.
+    #https://realguess.net/2015/10/06/overriding-the-default-forwarded-ssh-port-in-vagrant/
+    template.vm.network "forwarded_port", guest: 22, host: 2220, id: "ssh"
     template.vm.hostname = "template"
     template.vm.provision "shell", path: "provision_machine.sh"
     template.vm.provider :virtualbox do |vb|
