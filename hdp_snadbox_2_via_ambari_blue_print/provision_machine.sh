@@ -5,7 +5,7 @@ sudo yum -y install nano
 sudo yum -y install epel-release
 sudo yum -y install htop
 
-
+ 
 ### add ansible pub key to  authorized_keys
 pub_key="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDmmI4P/2clLwuc6eNGm5+Oeo+f3CI93isM3vfclNK7xvKdRTpXqLn3QsaYOPwT7dRTMkZdfA0mHjQ5dkL2O7G6xTrzawvBBFL9c5VVMm+EKGJc7eSk74K54k3DeCUax0tCtDGi4aJCVLVpQkDv/mmFRyaB9aKMXesMuiep6gHFVM8jzCJ8VmVpSTA31LccWfhoewxW67W3h5oLNVyfM93OV5UNdTBT+MrYdqsftzV+97f6jBMM6LR32hVPThf9gGF5qkZ9UBLfnw6rmJf+7TOxE/3nrVZHnXC8OzJjh+3PG+0BSIUXZrKzI6w409sE60jFzD2Vvc2C9oCUWYYa8p2x vagrant@myAnsible"
 
@@ -13,9 +13,6 @@ if !  grep "${pub_key}"  /home/vagrant/.ssh/authorized_keys ; then
   echo "${pub_key}"  >> /home/vagrant/.ssh/authorized_keys
 fi
 
-
-# sudo  route del default gw <default_gateway_ip>
-# sudo  route add default gw <default_gateway_ip>
 
 ## local repo is created under the ansible machine
 # local_repo_location=10.0.0.20:80

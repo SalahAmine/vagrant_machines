@@ -20,27 +20,26 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.ssh.insert_key = false
   # this is the default private_key used
   config.ssh.private_key_path = [ "~/.vagrant.d/insecure_private_key"]
+  config.vm.synced_folder "C:\\Users\\ssa-pro\\Desktop\\work\\airflow", "/root/synced"
+  # config.vm.synced_folder "C:\\Users\\ssa-pro\\Desktop\\work\\Project_airflow\\dags_dir", "/root/airflow/dags"
 
-  config.vm.define :hdpsandbox do |hdpsandbox|
+  config.vm.define :airflowDev do |airflowDev|
     # centos 7.5
-    hdpsandbox.vm.box = "bento/centos-7"
-    hdpsandbox.vm.box_version = "201808.24.0"
-    hdpsandbox.vm.network :private_network, ip: "10.0.0.21"
-    hdpsandbox.vm.network "forwarded_port", guest: 22, host: 2221
-    hdpsandbox.vm.network "forwarded_port", guest: 8080, host: 8081
-    # for oozie UI
-    hdpsandbox.vm.network "forwarded_port", guest: 11000, host: 11000
-    # for spark2 UI
-    hdpsandbox.vm.network "forwarded_port", guest: 18081, host: 18081
-    hdpsandbox.vm.hostname = "hdpsandbox"
-    hdpsandbox.vm.provision "shell", path: "provision_machine.sh"
+    airflowDev.vm.box = "bento/centos-7"
+    airflowDev.vm.box_version = "201808.24.0"
+    airflowDev.vm.network :private_network, ip: "10.0.0.41"
+    # Must specified `id: "ssh"` in order to override the default forwarded SSH port.
+    #https://realguess.net/2015/10/06/overriding-the-default-forwarded-ssh-port-in-vagrant/
+    airflowDev.vm.network "forwarded_port", guest: 22, host: 2241, id: "ssh"
+    airflowDev.vm.network "forwarded_port", guest: 5678, host: 5678
 
-    hdpsandbox.vm.provider :virtualbox do |vb|
-      vb.name = "hdpsandbox"
-      vb.memory = 16384
-      vb.cpus = 4
+    airflowDev.vm.hostname = "airflowDev"
+    airflowDev.vm.provision "shell", path: "provision_machine.sh"
+    airflowDev.vm.provider :virtualbox do |vb|
+      vb.name = "airflowDev"
+      vb.memory = 2048
+      vb.cpus = 2
     end
-
   end
 
 end

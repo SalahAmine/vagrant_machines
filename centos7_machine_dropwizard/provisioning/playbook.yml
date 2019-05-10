@@ -1,0 +1,27 @@
+---
+- name: create a local repo for ambari
+  hosts: all
+  # connection: local
+    # Setting gather_facts: False on a playbook allows this implicit fact gathering to be skipped.
+  gather_facts: False
+  become: yes
+  tasks:
+    - name: install some packages
+      yum: name={{item}} state=installed
+      with_items:
+         - httpd
+         - createrepo
+         - rsync
+         - epel-release
+         - nano
+
+    - name: provision the local repo
+      script: create_local_repos.sh
+
+    - name: restart wob server
+      service: name=httpd state=restarted enabled=yes
+
+
+    # - name: Generate /etc/ssh/ RSA host key
+    #   command : ssh-keygen -q -t rsa -f /etc/ssh/ssh_host_rsa_key -C "" -N ""
+    #   creates: /etc/ssh/ssh_host_rsa_key

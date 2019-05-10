@@ -8,8 +8,6 @@
 # Vagrant multi-machine sample setup
 # ref: https://stackoverflow.com/questions/24867252/allow-two-or-more-vagrant-vms-to-communicate-on-their-own-network
 
-# By default, Vagrant shares your project directory (remember, that is the one with the Vagrantfile) to the /vagrant directory in your guest machine.
-
 VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
@@ -23,23 +21,18 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # this is the default private_key used
   config.ssh.private_key_path = [ "~/.vagrant.d/insecure_private_key"]
 
-  config.vm.synced_folder "C:\\Users\\ssa-pro\\Desktop\\work\\playbooks", "/home/vagrant/synced"
-
-
-  config.vm.define :myAnsible do |myAnsible|
+  config.vm.define :template do |template|
     # centos 7.5
-    myAnsible.vm.box = "bento/centos-7"
-    myAnsible.vm.box_version = "201808.24.0"
-    myAnsible.vm.network :private_network, ip: "10.0.0.20"
-    myAnsible.vm.network "forwarded_port", guest: 22, host: 2220 , id:"ssh"
-    myAnsible.vm.network "forwarded_port", guest: 80, host: 8020
-    # for prometheus
-    myAnsible.vm.network "forwarded_port", guest: 9090, host: 9090
-    myAnsible.vm.hostname = "myAnsible"
-    # myAnsible.vm.provision "shell", path: "provision_machine.sh"
-    myAnsible.vm.provision "file", source: "key-pairs/id_rsa", destination: "/home/vagrant/.ssh/id_rsa"
+    template.vm.box = "bento/centos-7"
+    template.vm.box_version = "201808.24.0"
+    template.vm.network :private_network, ip: "10.0.0.20"
+    # Must specified `id: "ssh"` in order to override the default forwarded SSH port.
+    #https://realguess.net/2015/10/06/overriding-the-default-forwarded-ssh-port-in-vagrant/
+    template.vm.network "forwarded_port", guest: 22, host: 2220, id: "ssh"
+    template.vm.hostname = "template"
+    template.vm.provision "shell", path: "provision_machine.sh"
     #The Vagrant Ansible Local provisioner allows you to provision the guest using Ansible playbooks by executing ansible-playbook directly on the guest machine.
-    myAnsible.vm.provision "ansible_local" do |ansible|
+    template.vm.provision "ansible_local" do |ansible|
       # options for installing  ansible_local
        ansible.compatibility_mode = "2.0"
        ansible.install_mode = "pip"
@@ -54,8 +47,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
        # https://www.vagrantup.com/docs/provisioning/ansible_intro.html
     end
 
-    myAnsible.vm.provider :virtualbox do |vb|
-      vb.name = "myAnsible"
+
+    template.vm.provider :virtualbox do |vb|
+      vb.name = "template"
       vb.memory = 2048
       vb.cpus = 2
     end

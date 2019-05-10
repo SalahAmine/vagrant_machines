@@ -20,6 +20,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.ssh.insert_key = false
   # this is the default private_key used
   config.ssh.private_key_path = [ "~/.vagrant.d/insecure_private_key"]
+  #config.vm.synced_folder "C:\\Users\\ssa-pro\\Desktop\\work\\playbooks", "/home/vagrant/synced"
 
   config.vm.define :template do |template|
     # centos 7.5

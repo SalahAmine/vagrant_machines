@@ -21,24 +21,24 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # this is the default private_key used
   config.ssh.private_key_path = [ "~/.vagrant.d/insecure_private_key"]
 
-  config.vm.define :hdpsandbox do |hdpsandbox|
+  config.vm.define :hdpsandbox2 do |hdpsandbox2|
     # centos 7.5
-    hdpsandbox.vm.box = "bento/centos-7"
-    hdpsandbox.vm.box_version = "201808.24.0"
-    hdpsandbox.vm.network :private_network, ip: "10.0.0.21"
-    hdpsandbox.vm.network "forwarded_port", guest: 22, host: 2221
-    hdpsandbox.vm.network "forwarded_port", guest: 8080, host: 8081
+    hdpsandbox2.vm.box = "bento/centos-7"
+    hdpsandbox2.vm.box_version = "201808.24.0"
+    hdpsandbox2.vm.network :private_network, ip: "10.0.0.23"
+    hdpsandbox2.vm.network "forwarded_port", guest: 22, host: 2223
+    hdpsandbox2.vm.network "forwarded_port", guest: 8080, host: 8083
     # for oozie UI
-    hdpsandbox.vm.network "forwarded_port", guest: 11000, host: 11000
+    hdpsandbox2.vm.network "forwarded_port", guest: 11000, host: 11003
     # for spark2 UI
-    hdpsandbox.vm.network "forwarded_port", guest: 18081, host: 18081
-    hdpsandbox.vm.hostname = "hdpsandbox"
-    hdpsandbox.vm.provision "shell", path: "provision_machine.sh"
+    hdpsandbox2.vm.network "forwarded_port", guest: 18081, host: 18083
+    hdpsandbox2.vm.hostname = "hdpsandbox2"
+    hdpsandbox2.vm.provision "shell", path: "provision_machine.sh"
 
-    hdpsandbox.vm.provider :virtualbox do |vb|
-      vb.name = "hdpsandbox"
-      vb.memory = 16384
-      vb.cpus = 4
+    hdpsandbox2.vm.provider :virtualbox do |vb|
+      vb.name = "hdpsandbox2"
+      vb.memory = 12384
+      vb.cpus = 3
     end
 
   end

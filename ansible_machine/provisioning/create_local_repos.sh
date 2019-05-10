@@ -2,7 +2,6 @@ ambari_version=2.6.2.2
 hdp_version=2.6.3.0
 
 
-
 sudo wget -nv "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/${ambari_version}/ambari.repo" -O /etc/yum.repos.d/ambari.repo
 # pour facilité, avoir la meme base url que le repo distant
 local_repo_path=/var/www/html
