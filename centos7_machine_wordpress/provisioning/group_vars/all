@@ -1,0 +1,8 @@
+---
+# Database system variables
+mysql_root_password: MySQL@007
+
+wordpress_version: "5.2.1"
+wordpress_db_name: wordpress
+wordpress_db_user: wordpressuser
+wordpress_db_password: okMz&puyzzcr_ysql#Pa11

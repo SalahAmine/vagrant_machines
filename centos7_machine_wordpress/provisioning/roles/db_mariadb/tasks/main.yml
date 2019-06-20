@@ -1,0 +1,45 @@
+---
+# This playbook is to perform MySQL installations.
+
+- name: Install MySQL Software Repo
+  yum:
+    name: http://repo.mysql.com/mysql57-community-release-el7-10.noarch.rpm
+    state: present
+
+- name: Install MySQL Database
+  yum: name=mysql-server state=present
+
+- name: Install MySQL-python
+  yum: name=MySQL-python state=present
+
+- name: Start & Enable MySQL Server to start on boot
+  service: name=mysqld state=started enabled=yes
+
+- stat: path=/root/.my.cnf
+  register: pwd_file
+
+# change mysql initial password
+- block:
+  - shell: grep 'temporary password' /var/log/mysqld.log | awk '{print $NF}';
+    register: result
+  -  set_fact:
+      mysql_root_pw: "{{ result.stdout }}"
+
+  - name: Change the temporary root password for MySQL Database
+    command: mysqladmin --user=root --password={{ mysql_root_pw }} password {{ mysql_root_password }}
+  - name: disable pluging validate password
+    command: mysql --user=root --password={{ mysql_root_password }} -e "UNINSTALL PLUGIN validate_password;"
+  # # 'localhost' needs to be the last item for idempotency, see
+  # # http://ansible.cc/docs/modules.html#mysql-user
+  # - name: update mysql root password for all root accounts
+  #   mysql_user: name=root host={{ item }} login_password={{mysql_root_pw}} password={{ mysql_root_password }}
+  #   with_items:
+  #     - "{{ ansible_hostname }}"
+  #     - 127.0.0.1
+  #     - ::1
+  #     - localhost
+    # explanaiton here
+    #https://medium.com/@benmorel/remove-the-mysql-root-password-ba3fcbe29870
+  - name: copy .my.cnf file with root password credentials
+    template: src=templates/my.cnf.j2 dest=/root/.my.cnf owner=root mode=0600
+  when: pwd_file.stat.exists == False

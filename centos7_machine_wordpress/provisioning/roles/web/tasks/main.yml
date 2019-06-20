@@ -1,0 +1,39 @@
+---
+# Playbook for Web Server
+
+## wordpress requires a recent  version of php 7.0 or >
+
+- name: Turn on epel repo
+  yum:
+    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    state: present
+    update_cache: yes
+
+- name: install yum utils
+  yum:
+    name: yum-utils
+    state: present
+    update_cache: yes
+
+- name: turn on remi-release-7.rpm
+  yum:
+    name: http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+    state: present
+    update_cache: yes
+
+# avant de procéder à l’installation du package , le package manager va mettre à jour son cache pour installer la dernière version du package depuis l’archive.
+- name: Install httpd and php
+  yum:
+     name: php, php-common, php-opcache, php-mcrypt, php-cli, php-gd, php-curl, php-mysql,php-xml
+     update_cache: yes
+     enablerepo: remi-php71
+
+
+- name: Install web role specific dependencies
+  yum: name={{ item }} state=installed
+  with_items:
+   - git
+
+# httpd est le programme du serveur HTTP d'Apache. Il a été conçu pour fonctionner sous forme de processus démon indépendant
+- name: Start & Enable Apache Server to start on boot
+  service: name=httpd state=started enabled=yes

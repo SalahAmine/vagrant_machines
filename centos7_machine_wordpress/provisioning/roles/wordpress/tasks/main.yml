@@ -1,0 +1,93 @@
+
+- stat: path=/var/www/html/wordpress
+  register: wp_dir
+
+- block:
+  - name: Download wordpress tarball
+    get_url:
+      url: "https://fr.wordpress.org/wordpress-{{ wordpress_version }}-fr_FR.tar.gz"
+      dest: /tmp/
+  - name: Extract wordpress tarball
+    unarchive:
+      src: "/tmp/wordpress-{{ wordpress_version }}-fr_FR.tar.gz"
+      dest: /var/www/html/
+      owner: apache
+      group: apache
+      copy: no
+
+  - name: Change file ownership, group and permissions
+    file:
+      path: /var/www/html/wordpress
+      mode: '0755'
+      recurse: yes
+
+  - name: Install prerequisite for Ansible's mysql modules
+    yum: name=MySQL-python state=present
+  when: wp_dir.stat.exists == False
+
+- stat: path=/var/www/html/wordpress/wp-config.php
+  register: wp_config_file
+
+- block:
+  ## create a database wordpress and wordpress_db_user and grant him all priveleges
+  ##
+  - name: Create wordpress db
+    mysql_db:
+      name: "{{ wordpress_db_name }}"
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+      state: present
+
+  - name: Create wordpress user
+    mysql_user:
+      name:     "{{ wordpress_db_user }}"
+      password: "{{ wordpress_db_password }}"
+      priv:     "{{ wordpress_db_name }}.*:ALL"
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+      state: present
+
+  - name: Set wordpress config
+    template:
+      src: ./templates/wp-config.php.j2
+      dest: "/var/www/html/wordpress/wp-config.php"
+      owner: "apache"
+      group: "apache"
+
+  - name: Set php.ini
+    become: true
+    lineinfile:
+      dest: /etc/php.ini
+      regexp: "post_max_size ="
+      line: "post_max_size = 128M"
+
+  - name: Set php.ini
+    become: true
+    lineinfile:
+      dest: /etc/php.ini
+      regexp: "upload_max_filesize ="
+      line: "upload_max_filesize = 128M"
+
+  - name: Set php.ini
+    become: true
+    lineinfile:
+      dest: /etc/php.ini
+      regexp: "max_execution_time ="
+      line: "max_execution_time = 180"
+
+  - name: Set httpd config
+    become: true
+    template:
+      src: ./templates/httpd.conf.j2
+      dest: "/etc/httpd/conf/httpd.conf"
+      owner: "root"
+      group: "root"
+
+  - name: Restart service httpd, in all cases
+    service:
+      name: httpd
+      state: restarted
+
+    when: wp_config_file.stat.exists == False
+
+# Now you can finish your WordPress installation by opening your favorite web browser and navigate to: http://localhost/wordpress/wp-admin/install.php
