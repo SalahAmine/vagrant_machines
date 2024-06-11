@@ -1,0 +1,54 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+# Vagrant multi-machine sample setup
+# ref: https://stackoverflow.com/questions/24867252/allow-two-or-more-vagrant-vms-to-communicate-on-their-own-network
+
+VAGRANTFILE_API_VERSION = "2"
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  # dont generate a pub/private key for this connection
+  # and use the unsecure private key shipped by vagrant by default
+  # which resides under .vagrant.d/insecure_private_key
+  # this way, the corresponding pub key will be inserted
+  # by vagrant into  ~/.ssh/authorized_keys
+  # https://github.com/hashicorp/vagrant/tree/master/keys
+  config.ssh.insert_key = false
+  # this is the default private_key used
+  config.ssh.private_key_path = [ "~/.vagrant.d/insecure_private_keys/vagrant.key.ed25519"]
+  #config.vm.synced_folder "C:\\Users\\ssa-pro\\Desktop\\work\\playbooks", "/home/vagrant/synced"
+
+  # Define a new VM called 'templateubuntu24'.
+  config.vm.define :templateubuntu24  do |template|
+    template.vm.box = "bento/ubuntu-24.04"
+    template.vm.box_version = "202404.26.0"
+    template.vm.network :private_network, ip: "10.0.0.20"
+    # Must specified `id: "ssh"` in order to override the default forwarded SSH port.
+    #https://realguess.net/2015/10/06/overriding-the-default-forwarded-ssh-port-in-vagrant/
+    template.vm.network "forwarded_port", guest: 22, host: 2220, id: "ssh"
+    template.vm.hostname = "templateubuntu24"
+    template.vm.provision "shell", path: "provision_machine.sh"
+    template.vm.provider :virtualbox do |vb|
+      # name of VM in Virtualbox UI
+      vb.name = "templateubuntu24"
+      vb.memory = 2048
+      vb.cpus = 2
+    end
+  end
+
+end
+
+# utiliser la VM : 
+# démarrer la VM
+# vagrant up 
+# # Accès via SSH avec Vagrant 
+# cd <path-to-vagrant-file>
+# vagrant ssh templateubuntu24
+
+# # Accès via SSH avec un client SSH 
+# ssh -i ~/.vagrant.d/insecure_private_keys/vagrant.key.ed25519 -p 2220 vagrant@localhost
+
